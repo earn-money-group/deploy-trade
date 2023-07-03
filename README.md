@@ -1,8 +1,8 @@
 这是一个监控 合约发布后 去mint的程序
 ----
 
-1、监控 ethereum 上的 vmpx 代币的发布
-2、发起mint操作
+- 1、监控 ethereum 上的 vmpx 代币的发布
+- 2、发起mint操作
 
 
 ### 编译
