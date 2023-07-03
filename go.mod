@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/ethereum/go-ethereum v1.12.0
+	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.8.1
 	github.com/urfave/cli/v2 v2.25.7
 	github.com/xiaobaiskill/kit v0.0.0-20221004152055-6133569bab6a

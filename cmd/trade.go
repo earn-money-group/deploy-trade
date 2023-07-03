@@ -23,7 +23,7 @@ var mint = &cli.Command{
 			Aliases: []string{"r"},
 			Usage:   "get data rpc",
 		},
-		&cli.StringSliceFlag{
+		&cli.StringFlag{
 			Name:  share.Contract,
 			Usage: "vmpx contract",
 		},

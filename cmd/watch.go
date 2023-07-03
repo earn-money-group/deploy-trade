@@ -22,22 +22,6 @@ var watch = &cli.Command{
 			Aliases: []string{"r"},
 			Usage:   "get data rpc",
 		},
-		&cli.StringFlag{
-			Name:    share.PrivateKey,
-			Aliases: []string{"p"},
-			Usage:   "private key",
-		},
-		&cli.Uint64Flag{
-			Name:  share.Power,
-			Usage: "contract power",
-			Value: 1,
-		},
-		&cli.Uint64Flag{
-			Name:    share.TxCount,
-			Aliases: []string{"c"},
-			Usage:   "send trasaction count",
-			Value:   1,
-		},
 	},
 	Before: func(c *cli.Context) error {
 		setLogLevel(c.String(share.Log))
@@ -52,7 +36,7 @@ func watchAction(c *cli.Context) (err error) {
 		log.Fatal("dial rpc failed", zap.Error(err))
 	}
 
-	watch := app.NewWatch(client, c.String(share.PrivateKey), c.Uint64(share.Power), c.Uint64(share.TxCount))
+	watch := app.NewWatch(client)
 
 	go watch.Watch(context.Background())
 

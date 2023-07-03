@@ -6,7 +6,7 @@ BUILDDIR ?= $(PWD)/app/contract
 
 .PHONY: build
 build: fmt vet
-	go build -o ./build/vmpx .
+	go build -o ./build/trade .
 
 
 .PHONY: fmt

@@ -16,29 +16,24 @@ import (
 type watchDeployedContract struct {
 	client  *ethclient.Client
 	chainId *big.Int
-	trade   *trade
 }
 
 func NewWatch(
 	client *ethclient.Client,
-	privateKey string,
-	power uint64,
-	count uint64,
 ) *watchDeployedContract {
 	chainId, err := client.ChainID(context.Background())
 	if err != nil {
 		log.Fatal("get chainId", zap.Error(err))
 	}
-	trade := NewTrade(client, chainId, privateKey, power, count)
 
 	return &watchDeployedContract{
 		client:  client,
 		chainId: chainId,
-		trade:   trade,
 	}
 }
 
 func (w *watchDeployedContract) Watch(ctx context.Context) {
+	log.Info("watch deployed contract...")
 	var lastBlock uint64
 	for {
 		blockNumber, err := w.client.BlockNumber(ctx)
@@ -61,26 +56,21 @@ func (w *watchDeployedContract) Watch(ctx context.Context) {
 		}
 		index := 0
 		txs := block.Transactions()
-		for index < txs.Len() {
+		len := txs.Len()
+		for index < len {
 			if txs[index].To() == nil {
-
 				contractAddr := crypto.CreateAddress(getFrom(txs[index], w.chainId), txs[index].Nonce())
+				log.Debug("new contract", zap.String("contract", contractAddr.Hex()))
+
 				code, err := w.client.CodeAt(ctx, contractAddr, nil)
 				if err != nil {
 					continue
 				}
-				if bytes.Contains(code, common.HexToHash("0x9af3d88fa3cc7ccaebec09593bdc0498b09e10865caff051172d4c36489d913c").Bytes()) {
+				if bytes.Contains(code, common.HexToHash("0x404d724a61636b4c6576696e204061636b65626f6d20406c62656c7961657620404a616d6d614265616e73206661697263727970746f2e6f7267").Bytes()) {
 					log.Info(
 						"watch vmpx contract",
 						zap.String("contract", contractAddr.Hex()),
 					)
-					err = w.trade.Trade(ctx, contractAddr)
-					if err == nil {
-						log.Info("mint completed")
-						return
-					} else {
-						log.Error("trade failed", zap.Error(err))
-					}
 				}
 			}
 			index++

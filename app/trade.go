@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/earn-money-group/deploy-trade/app/contract"
@@ -30,19 +31,22 @@ func NewTrade(
 	power uint64,
 	count uint64,
 ) *trade {
-	if power > 0 && power < 195 {
-		log.Fatal("power > 0 && power < 195")
+	defer client.Close()
+
+	if !(power > 0 && power < 195) {
+		log.Fatal("power > 0 && power < 195", zap.Uint64("power", power))
 	}
 	private, err := crypto.HexToECDSA(privateKey)
 	if err != nil {
 		log.Fatal("crypto.HexToECDSA err", zap.Error(err))
 	}
-	if count > 0 {
+
+	if int(count) <= 0 {
 		log.Fatal("count > 0", zap.Uint64("count", count))
 	}
 
 	publicKey, ok := private.Public().(*ecdsa.PublicKey)
-	if ok {
+	if !ok {
 		log.Fatal("invalid publickey", zap.Error(err))
 	}
 	return &trade{
@@ -84,21 +88,24 @@ func (t *trade) Trade(ctx context.Context, token common.Address) error {
 		return err
 	}
 
+	// gasPrice = decimal.NewFromBigInt(gasPrice, 0).Mul(decimal.NewFromFloat(1.2)).BigInt()
+
 	nonce, err := t.client.NonceAt(ctx, t.from, nil)
 	if err != nil {
 		log.Error("get nonce failed", zap.Error(err))
 		return err
 	}
-
 	for index := 0; index < t.txCount; index++ {
-		_, err := tradeToken.Mint(getOpts(t.client, t.chainId, t.private, int64(nonce), gasPrice), big.NewInt(int64(t.power)))
+		tx, err := tradeToken.Mint(getOpts(t.client, t.chainId, t.private, int64(nonce), gasPrice), big.NewInt(int64(t.power)))
 		if err == nil {
+			log.Info("send to mint token", zap.String("tx", tx.Hash().Hex()))
 			nonce++
 		} else {
 			log.Error("send trasaction failed", zap.Error(err))
 			return err
 		}
 	}
+	os.Exit(0)
 	return nil
 }
 
